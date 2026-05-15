@@ -34,7 +34,7 @@ def login():
 @app.route('/auth/instagram')
 def auth_instagram():
     """Initiate Instagram OAuth flow"""
-    scope = 'instagram_basic,instagram_manage_comments,instagram_manage_messages,pages_show_list,pages_read_engagement'
+    scope = 'instagram_basic,instagram_manage_comments,pages_show_list,pages_read_engagement'
     redirect_uri = f"{BASE_URL}/auth/callback"
     
     auth_url = (
@@ -64,9 +64,14 @@ def auth_callback():
         'code': code
     })
     
-    short_lived_token = token_response.json().get('access_token')
+    response_data = token_response.json()
+    print(f"Meta token response: {response_data}")
+    
+    short_lived_token = response_data.get('access_token')
     if not short_lived_token:
-        return "Failed to get access token", 400
+        error_msg = response_data.get('error', {})
+        print(f"Token exchange failed: {error_msg}")
+        return f"Failed to get access token: {error_msg.get('message', 'Unknown error')}", 400
     
     # Exchange for long-lived token
     access_token = InstagramAPI.get_long_lived_token(
@@ -215,7 +220,7 @@ def webhook():
     return 'OK', 200
 
 def process_comment(comment_id, media_id, commenter_id, commenter_username, comment_text):
-    """Process new comment: reply + send DM"""
+    """Process new comment: reply only (DM functionality disabled)"""
     
     # Check if already processed
     if ProcessedComment.is_processed(comment_id):
@@ -253,17 +258,17 @@ def process_comment(comment_id, media_id, commenter_id, commenter_username, comm
     
     # Send DM
     dm_sent = False
-    try:
-        api.send_dm(
-            account['instagram_user_id'],
-            commenter_id,
-            account['dm_message'],
-            account.get('cta_button_text'),
-            account.get('cta_button_url')
-        )
-        dm_sent = True
-    except Exception as e:
-        print(f"Failed to send DM: {e}")
+# try:
+#     api.send_dm(
+#         account['instagram_user_id'],
+#         commenter_id,
+#         account['dm_message'],
+#         account.get('cta_button_text'),
+#         account.get('cta_button_url')
+#     )
+#     dm_sent = True
+# except Exception as e:
+#     print(f"Failed to send DM: {e}")
     
     # Mark as processed
     ProcessedComment.add(
