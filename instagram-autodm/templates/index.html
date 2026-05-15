@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Instagram AutoDM</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 24px;
+            color: #1a1a1a;
+        }
+        .btn {
+            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background: #6366f1;
+        }
+        .btn-danger {
+            background: #ef4444;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .accounts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .account-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .account-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        .account-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .account-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            margin-right: 12px;
+        }
+        .account-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+        .account-username {
+            font-size: 14px;
+            color: #666;
+        }
+        .account-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .account-actions .btn {
+            flex: 1;
+            text-align: center;
+            font-size: 13px;
+            padding: 8px 12px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+        }
+        .empty-state h2 {
+            font-size: 24px;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+        .empty-state p {
+            color: #666;
+            margin-bottom: 24px;
+        }
+        .logout-btn {
+            background: #6b7280;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📩 Instagram AutoDM</h1>
+        <div style="display: flex; gap: 12px;">
+            <a href="{{ url_for('auth_instagram') }}" class="btn">+ Add Account</a>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        {% if accounts %}
+            <h2 style="margin-bottom: 16px; color: #1a1a1a;">Connected Accounts</h2>
+            <div class="accounts-grid">
+                {% for account in accounts %}
+                <div class="account-card">
+                    <div class="account-header">
+                        <div class="account-icon">📸</div>
+                        <div>
+                            <div class="account-name">{{ account.username }}</div>
+                            <div class="account-username">@{{ account.username }}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin: 16px 0; padding: 12px; background: #f9fafb; border-radius: 8px; font-size: 13px;">
+                        <div style="color: #666; margin-bottom: 4px;">Reply Message:</div>
+                        <div style="color: #1a1a1a;">{{ account.reply_message }}</div>
+                    </div>
+                    
+                    <div class="account-actions">
+                        <a href="/account/{{ account.id }}" class="btn btn-secondary">Manage</a>
+                        <form action="/account/{{ account.id }}/delete" method="POST" style="flex: 1;" onsubmit="return confirm('Are you sure?')">
+                            <button type="submit" class="btn btn-danger" style="width: 100%;">Disconnect</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <h2>No accounts connected yet</h2>
+                <p>Connect your Instagram Business account to start auto-responding to comments</p>
+                <a href="{{ url_for('auth_instagram') }}" class="btn">Connect Instagram Account</a>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
